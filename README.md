@@ -14,8 +14,15 @@ A production-style mini banking project using:
 - Current account overdraft rule
 - Transaction history per account
 - File persistence (`data/accounts.json` locally, `/tmp/accounts.json` on Vercel)
-- Web dashboard inspired by PayPal + Paytm color language
+- Modern NovaPay-style dashboard layout (sidebar, KPI cards, overview panel, quick actions)
+- Account analytics widgets (total balance, total credited, total debited, account summaries)
+- PIN-protected login screen (demo PIN: `1234`)
 - CLI menu helper for terminal use
+
+
+## PIN Access
+- Open the app and enter PIN: `1234`
+- The session stays unlocked until you click **Logout** or session expires.
 
 ## Run locally
 ```bash

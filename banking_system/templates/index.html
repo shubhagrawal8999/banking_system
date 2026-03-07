@@ -3,69 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Banking Pro</title>
+  <title>NovaPay Banking Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo">Banking<span>Pro</span></div>
-    <div class="tag">Fast. Safe. Trusted.</div>
-  </header>
-
-  <main class="container">
-    {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
-
-    <section class="card form-card">
-      <h2>Create Account</h2>
-      <form action="/accounts" method="post" class="grid-form">
-        <input type="text" name="name" placeholder="Customer name" required />
-        <select name="account_type">
-          <option value="savings">Savings</option>
-          <option value="current">Current</option>
-        </select>
-        <input type="number" step="0.01" name="initial_balance" placeholder="Initial balance" required />
-        <input type="number" step="0.01" name="min_balance" placeholder="Savings minimum balance" value="500" />
-        <input type="number" step="0.01" name="overdraft_limit" placeholder="Current overdraft limit" value="1000" />
-        <button type="submit">Create Account</button>
-      </form>
-    </section>
-
-    <section class="accounts">
-      {% for account in accounts %}
-      <article class="card account-card">
-        <div class="head">
-          <h3>{{ account.name }}</h3>
-          <span>{{ account.account_type() }}</span>
+  <div class="layout">
+    <aside class="sidebar glass">
+      <div class="brand">
+        <div class="brand-icon">💳</div>
+        <div>
+          <h1>NovaPay</h1>
+          <p>Banking Pro</p>
         </div>
-        <p class="balance">₹ {{ '%.2f'|format(account.balance) }}</p>
-        <p class="meta">ID: {{ account.account_id }}</p>
+      </div>
 
-        <div class="actions">
-          <form action="/accounts/{{ account.account_id }}/deposit" method="post">
-            <input type="number" step="0.01" name="amount" placeholder="Deposit amount" required />
-            <button type="submit" class="deposit">Deposit</button>
-          </form>
-          <form action="/accounts/{{ account.account_id }}/withdraw" method="post">
-            <input type="number" step="0.01" name="amount" placeholder="Withdraw amount" required />
-            <button type="submit" class="withdraw">Withdraw</button>
-          </form>
+      <div class="balance-pill">Total Balance<br><strong>₹{{ '%.2f'|format(stats.total_balance) }}</strong></div>
+
+      <nav class="menu">
+        <p>MENU</p>
+        <a class="active" href="#">🏠 Dashboard</a>
+        <a href="#accounts">🏦 Accounts</a>
+        <a href="#overview">📊 Overview</a>
+        <a href="#actions">⚡ Quick Actions</a>
+      </nav>
+
+      <div class="profile-card">
+        <div class="avatar">DS</div>
+        <div>
+          <strong>Deepak</strong>
+          <p>Account Holder</p>
         </div>
+      </div>
+    </aside>
 
-        <details>
-          <summary>Transaction History</summary>
-          <ul>
-            {% for tx in account.history %}
-              <li>{{ tx.timestamp }} - {{ tx.action }} ₹{{ '%.2f'|format(tx.amount) }} (Bal: ₹{{ '%.2f'|format(tx.balance_after) }})</li>
+    <main class="main-content">
+      <header class="header glass">
+        <div>
+          <p class="muted">Good evening,</p>
+          <h2>Dashboard</h2>
+        </div>
+        <div class="header-actions">
+          <form action="/logout" method="post"><button type="submit" class="ghost">Sign Out</button></form>
+          <button class="primary" onclick="document.getElementById('create-account').scrollIntoView({behavior:'smooth'})">+ Account</button>
+        </div>
+      </header>
+
+      {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+
+      <section class="stats-grid">
+        <article class="card glass">
+          <p class="label">TOTAL BALANCE</p>
+          <h3>₹{{ '%.2f'|format(stats.total_balance) }}</h3>
+          <p class="muted">{{ stats.active_accounts }} active accounts</p>
+        </article>
+        <article class="card glass">
+          <p class="label">TOTAL CREDITED</p>
+          <h3 class="credit">₹{{ '%.2f'|format(stats.total_credited) }}</h3>
+          <p class="muted">▲ This session</p>
+        </article>
+        <article class="card glass">
+          <p class="label">TOTAL DEBITED</p>
+          <h3 class="debit">₹{{ '%.2f'|format(stats.total_debited) }}</h3>
+          <p class="muted">▼ This session</p>
+        </article>
+      </section>
+
+      <section class="overview" id="overview">
+        <article class="card glass chart-card">
+          <div class="section-head"><h3>Balance Overview</h3><p>Credits vs Debits across accounts</p></div>
+          <div class="chart-bars">
+            {% for item in stats.account_summaries %}
+            {% set max_base = [item.credited, item.debited, 1]|max %}
+            <div class="bar-group">
+              <div class="bars">
+                <div class="bar credit" style="height: {{ (item.credited / max_base) * 120 }}px"></div>
+                <div class="bar debit" style="height: {{ (item.debited / max_base) * 120 }}px"></div>
+              </div>
+              <span>{{ item.name }}</span>
+            </div>
             {% else %}
-              <li>No transactions yet.</li>
+            <p class="muted">No account activity yet. Create an account and start transactions.</p>
             {% endfor %}
-          </ul>
-        </details>
-      </article>
-      {% else %}
-      <p>No accounts found. Create one above.</p>
-      {% endfor %}
-    </section>
-  </main>
+          </div>
+        </article>
+
+        <article class="card glass accounts-mini" id="accounts">
+          <h3>Accounts</h3>
+          {% for item in stats.account_summaries %}
+          <div class="mini-row">
+            <div>
+              <strong>{{ item.name }}</strong>
+              <p>{{ item.kind }}</p>
+            </div>
+            <strong>₹{{ '%.2f'|format(item.balance) }}</strong>
+          </div>
+          {% else %}
+          <p class="muted">No accounts found.</p>
+          {% endfor %}
+        </article>
+      </section>
+
+      <section class="quick-actions" id="actions">
+        <h3>Quick Actions</h3>
+        <div class="action-grid">
+          <article class="card glass" id="create-account">
+            <h4>Create Account</h4>
+            <form action="/accounts" method="post" class="grid-form">
+              <input type="text" name="name" placeholder="Customer name" required />
+              <select name="account_type">
+                <option value="savings">Savings</option>
+                <option value="current">Current</option>
+              </select>
+              <input type="number" step="0.01" name="initial_balance" placeholder="Initial balance" required />
+              <input type="number" step="0.01" name="min_balance" placeholder="Savings minimum balance" value="500" />
+              <input type="number" step="0.01" name="overdraft_limit" placeholder="Current overdraft limit" value="1000" />
+              <button type="submit" class="primary">Create Account</button>
+            </form>
+          </article>
+
+          <article class="card glass full">
+            <h4>Manage Accounts</h4>
+            <div class="accounts-table">
+              {% for account in accounts %}
+              <div class="account-block">
+                <div class="account-head">
+                  <div>
+                    <strong>{{ account.name }}</strong>
+                    <p>{{ account.account_type() }}</p>
+                  </div>
+                  <strong>₹{{ '%.2f'|format(account.balance) }}</strong>
+                </div>
+
+                <div class="actions">
+                  <form action="/accounts/{{ account.account_id }}/deposit" method="post">
+                    <input type="number" step="0.01" name="amount" placeholder="Deposit amount" required />
+                    <button type="submit" class="credit-btn">Deposit</button>
+                  </form>
+                  <form action="/accounts/{{ account.account_id }}/withdraw" method="post">
+                    <input type="number" step="0.01" name="amount" placeholder="Withdraw amount" required />
+                    <button type="submit" class="debit-btn">Withdraw</button>
+                  </form>
+                </div>
+
+                <details>
+                  <summary>Transaction History</summary>
+                  <ul>
+                    {% for tx in account.history %}
+                    <li>{{ tx.timestamp }} · {{ tx.action }} ₹{{ '%.2f'|format(tx.amount) }} · Bal ₹{{ '%.2f'|format(tx.balance_after) }}</li>
+                    {% else %}
+                    <li>No transactions yet.</li>
+                    {% endfor %}
+                  </ul>
+                </details>
+              </div>
+              {% else %}
+              <p class="muted">No accounts yet.</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
