@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banking Pro</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">Banking<span>Pro</span></div>
+    <div class="tag">Fast. Safe. Trusted.</div>
+  </header>
+
+  <main class="container">
+    {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+
+    <section class="card form-card">
+      <h2>Create Account</h2>
+      <form action="/accounts" method="post" class="grid-form">
+        <input type="text" name="name" placeholder="Customer name" required />
+        <select name="account_type">
+          <option value="savings">Savings</option>
+          <option value="current">Current</option>
+        </select>
+        <input type="number" step="0.01" name="initial_balance" placeholder="Initial balance" required />
+        <input type="number" step="0.01" name="min_balance" placeholder="Savings minimum balance" value="500" />
+        <input type="number" step="0.01" name="overdraft_limit" placeholder="Current overdraft limit" value="1000" />
+        <button type="submit">Create Account</button>
+      </form>
+    </section>
+
+    <section class="accounts">
+      {% for account in accounts %}
+      <article class="card account-card">
+        <div class="head">
+          <h3>{{ account.name }}</h3>
+          <span>{{ account.account_type() }}</span>
+        </div>
+        <p class="balance">₹ {{ '%.2f'|format(account.balance) }}</p>
+        <p class="meta">ID: {{ account.account_id }}</p>
+
+        <div class="actions">
+          <form action="/accounts/{{ account.account_id }}/deposit" method="post">
+            <input type="number" step="0.01" name="amount" placeholder="Deposit amount" required />
+            <button type="submit" class="deposit">Deposit</button>
+          </form>
+          <form action="/accounts/{{ account.account_id }}/withdraw" method="post">
+            <input type="number" step="0.01" name="amount" placeholder="Withdraw amount" required />
+            <button type="submit" class="withdraw">Withdraw</button>
+          </form>
+        </div>
+
+        <details>
+          <summary>Transaction History</summary>
+          <ul>
+            {% for tx in account.history %}
+              <li>{{ tx.timestamp }} - {{ tx.action }} ₹{{ '%.2f'|format(tx.amount) }} (Bal: ₹{{ '%.2f'|format(tx.balance_after) }})</li>
+            {% else %}
+              <li>No transactions yet.</li>
+            {% endfor %}
+          </ul>
+        </details>
+      </article>
+      {% else %}
+      <p>No accounts found. Create one above.</p>
+      {% endfor %}
+    </section>
+  </main>
+</body>
+</html>
