@@ -1,0 +1,72 @@
+:root {
+  --paypal-blue: #003087;
+  --paytm-blue: #00baf2;
+  --ink: #1f2a44;
+  --bg: #f4f8ff;
+  --white: #fff;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: linear-gradient(120deg, var(--bg), #e8f6ff);
+  color: var(--ink);
+}
+
+.topbar {
+  background: linear-gradient(90deg, var(--paypal-blue), var(--paytm-blue));
+  color: var(--white);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo { font-size: 1.5rem; font-weight: 700; }
+.logo span { color: #aee8ff; }
+.container { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+.card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 18px rgba(0, 48, 135, 0.08);
+  margin-bottom: 1rem;
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
+}
+
+input, select, button {
+  padding: 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #d8e3ff;
+}
+
+button {
+  background: var(--paypal-blue);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+button.deposit { background: #00a86b; }
+button.withdraw { background: #ca3c66; }
+
+.accounts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.account-card .head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.balance { font-size: 1.4rem; font-weight: 700; margin: 0.3rem 0; }
+.meta { font-size: 0.8rem; color: #51617f; }
+.actions form { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+.alert.error { background: #ffd9df; color: #8b1c3d; padding: 0.7rem; border-radius: 8px; }
