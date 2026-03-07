@@ -15,7 +15,13 @@ A production-style mini banking project using:
 - Transaction history per account
 - File persistence (`data/accounts.json` locally, `/tmp/accounts.json` on Vercel)
 - Web dashboard inspired by PayPal + Paytm color language
+- PIN-protected login screen (demo PIN: `1234`)
 - CLI menu helper for terminal use
+
+
+## PIN Access
+- Open the app and enter PIN: `1234`
+- The session stays unlocked until you click **Logout** or session expires.
 
 ## Run locally
 ```bash

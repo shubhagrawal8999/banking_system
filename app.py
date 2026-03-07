@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import os
 
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, session, url_for
 
 from banking_system.repository import AccountRepository
 from banking_system.service import BankService
+
+PIN_CODE = "1234"
 
 
 def _default_db_path() -> str:
@@ -19,8 +21,51 @@ def _default_db_path() -> str:
     return "data/accounts.json"
 
 
-app = Flask(__name__)
+def _create_app() -> Flask:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    template_dir = os.path.join(base_dir, "banking_system", "templates")
+    static_dir = os.path.join(base_dir, "banking_system", "static")
+
+    flask_app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+    flask_app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-only-secret-change-me")
+    return flask_app
+
+
+app = _create_app()
 service = BankService(AccountRepository(_default_db_path()))
+
+
+@app.before_request
+def require_pin() -> None:
+    public_endpoints = {"pin_login", "static"}
+    if request.endpoint in public_endpoints:
+        return
+
+    if session.get("pin_verified"):
+        return
+
+    return redirect(url_for("pin_login"))
+
+
+@app.get("/pin")
+def pin_login():
+    return render_template("pin.html", error=None)
+
+
+@app.post("/pin")
+def pin_login_submit():
+    pin = request.form.get("pin", "").strip()
+    if pin == PIN_CODE:
+        session["pin_verified"] = True
+        return redirect(url_for("dashboard"))
+
+    return render_template("pin.html", error="Invalid PIN. Try 1234."), 401
+
+
+@app.post("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("pin_login"))
 
 
 @app.get("/")
