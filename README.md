@@ -1,84 +1,149 @@
-# Banking System (OOP + Web + CLI)
+# Banking System
 
-A production-style mini banking project using:
-- **Abstraction** (`BankAccount` abstract base class)
-- **Encapsulation** (controlled balance updates)
-- **Inheritance** (`SavingsAccount`, `CurrentAccount`)
-- **Polymorphism** (type-specific withdrawal rules)
-- **Layered design** (models, service, repository, UI)
+> A learning project for applying object-oriented design, layered architecture, persistence, testing, and web deployment to a small banking domain.
 
-## Features
-- Create savings/current accounts
-- Deposit and withdraw funds
-- Savings minimum balance rule
-- Current account overdraft rule
-- Transaction history per account
-- File persistence (`data/accounts.json` locally, `/tmp/accounts.json` on Vercel)
-- Web dashboard inspired by PayPal + Paytm color language
-- CLI menu helper for terminal use
+## Why I built this
+
+I wanted a project where the business rules were more important than the UI.
+
+A banking system is a useful exercise because it forces you to model different account types, balance rules, transactions, persistence, and validation.
+
+I used the project to practice turning business rules into a maintainable Python architecture.
+
+## What it does
+
+- Savings accounts
+- Current accounts
+- Deposits and withdrawals
+- Minimum-balance rules
+- Overdraft rules
+- Transaction history
+- JSON persistence
+- Web dashboard
+- CLI interaction
+- Unit tests
+
+## Architecture
+
+~~~text
+Web UI / CLI
+     │
+     ▼
+BankService
+     │
+     ├── SavingsAccount
+     ├── CurrentAccount
+     └── Transaction
+     │
+     ▼
+AccountRepository
+     │
+     ▼
+JSON persistence
+~~~
+
+The main separation is simple: models contain domain rules, the service contains application operations, the repository handles persistence, and the UI handles web and CLI interaction.
+
+## OOP concepts demonstrated
+
+### Abstraction
+
+BankAccount defines the common contract for account types.
+
+### Encapsulation
+
+Balance changes happen through controlled operations.
+
+### Inheritance
+
+SavingsAccount and CurrentAccount extend the base account model.
+
+### Polymorphism
+
+Each account type implements its own withdrawal rule.
+
+~~~text
+Savings:
+balance - withdrawal >= minimum balance
+
+Current:
+balance - withdrawal >= -overdraft limit
+~~~
+
+## Tech stack
+
+- Python
+- Flask
+- Object-oriented design
+- JSON persistence
+- pytest
+- Vercel
+
+## Project structure
+
+~~~text
+.
+├── app.py
+├── banking_system/
+│   ├── models.py
+│   ├── service.py
+│   ├── repository.py
+│   ├── templates/
+│   └── static/
+├── tests/
+├── api/
+├── requirements.txt
+└── vercel.json
+~~~
 
 ## Run locally
-```bash
+
+~~~bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python app.py
-```
-Then open: `http://localhost:8000`
+~~~
 
-## Deploy on Vercel
-This repo is now Vercel-ready.
+Open http://localhost:8000
 
-### 1) Push code to GitHub
-```bash
-git add .
-git commit -m "prepare vercel deployment"
-git push
-```
+Run tests with pytest -q.
 
-### 2) Import project in Vercel
-- Go to Vercel dashboard → **Add New Project**.
-- Import your GitHub repo.
-- Framework preset: **Other**.
-- No special build command required.
+## Deployment
 
-### 3) Optional environment variable
-If you want custom file path for storage:
-- `ACCOUNT_DB_PATH=/tmp/accounts.json` (default already used on Vercel).
+The project includes a Vercel entrypoint. For the deployed version, JSON storage is placed under /tmp.
 
-### 4) Deploy
-- Click **Deploy**.
-- Vercel uses `vercel.json` and `api/index.py` automatically.
+That is useful for demonstrating deployment, but it is not durable production storage.
 
-## Important Vercel note
-Vercel serverless filesystem is ephemeral. Data in `/tmp` can reset between executions.
-For true production persistence, replace JSON file storage with a managed database (PostgreSQL, Supabase, Neon, etc.).
+## Engineering trade-offs
 
-## Test
-```bash
-pytest -q
-```
+### JSON instead of PostgreSQL
 
-## Project structure
-- `banking_system/models.py` -> domain entities and OOP rules
-- `banking_system/service.py` -> business operations
-- `banking_system/repository.py` -> JSON persistence
-- `banking_system/templates/index.html` -> web UI
-- `banking_system/static/styles.css` -> branding/styling
-- `tests/test_banking_system.py` -> unit tests
-- `api/index.py` -> Vercel Python serverless entrypoint
-- `vercel.json` -> Vercel routing/build config
+I kept persistence simple so the focus stayed on domain modeling.
 
-## Debug mindset & common challenges
-1. **Concurrent writes to JSON file**: move to DB (PostgreSQL) with transactions for multi-user scale.
-2. **Float precision for money**: use `Decimal` for financial accuracy in production.
-3. **Authentication & authorization**: secure account operations with login, roles, and audit logging.
-4. **Input validation and abuse protection**: add form validation, rate limiting, and CSRF protection.
-5. **Observability**: add structured logging, metrics, and tracing for incidents.
+### Float instead of Decimal
 
-## What can be improved next
-- JWT-based auth + user identity mapping
-- REST API layer (`/api/v1/...`) and OpenAPI docs
-- Docker + CI pipeline + cloud deployment
-- Switch storage to SQLAlchemy + PostgreSQL
-- Add transfer between accounts + reversal workflow
+The implementation currently uses floats for simplicity. A financial production system should use Decimal or another exact monetary representation.
+
+### No authentication
+
+The project focuses on application architecture rather than identity and authorization.
+
+## What I learned
+
+This project taught me that good architecture is mostly about boundaries. Keeping domain rules separate from persistence and UI made the system easier to reason about and extend.
+
+## Roadmap
+
+- [ ] Replace JSON with PostgreSQL
+- [ ] Use Decimal for monetary values
+- [ ] Add authentication and authorization
+- [ ] Add account-to-account transfers
+- [ ] Add transaction reversal flows
+- [ ] Add structured logging
+- [ ] Add API documentation
+- [ ] Add CI
+
+## Status
+
+✅ Learning project / deployable demo
